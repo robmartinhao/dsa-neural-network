@@ -21,4 +21,26 @@ object mlp {
         allWeigths
     }
   }
+
+  def forwardPass(networkInput: DenseMatrix[Double],
+                  layerWeights: Seq[DenseMatrix[Double]],
+                  activationFn: DenseMatrix[Double] => DenseMatrix[Double]): (Array[DenseMatrix[Double]], DenseMatrix[Double]) = {
+    assert(networkInput.rows + 1 == layerWeights.head.rows)
+
+    val initialActivations = new Array[DenseMatrix[Double]](layerWeights.size + 1)
+
+    initialActivations(0) = networkInput.t
+
+    layerWeights.zipWithIndex.foldLeft((initialActivations, networkInput.t)) {
+      case ((activations, input), (weight, weightIdx)) =>
+
+        val inputWithBias = DenseMatrix.horzcat(DenseMatrix(1.0), input)
+
+        val layerActivation = inputWithBias * weight
+
+        activations(weightIdx + 1) = layerActivation
+
+        (activations, activationFn(layerActivation))
+    }
+  }
 }
