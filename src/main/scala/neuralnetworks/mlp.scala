@@ -2,6 +2,7 @@ package neuralnetworks
 
 import breeze.linalg.DenseMatrix
 import breeze.stats.distributions.Gaussian
+import spire.implicits.rightModuleOps
 
 object mlp {
 
@@ -43,4 +44,38 @@ object mlp {
         (activations, activationFn(layerActivation))
     }
   }
+
+  def backwardPass(layerActivations: Array[DenseMatrix[Double]],
+                   layerWeights: Seq[DenseMatrix[Double]],
+                   networkOutput: DenseMatrix[Double],
+                   target: DenseMatrix[Double],
+                   activationFn: DenseMatrix[Double] => DenseMatrix[Double],
+                   activationFnDerivative: DenseMatrix[Double] => DenseMatrix[Double]): Array[DenseMatrix[Double]] =
+  {
+
+    val predictionError = target - networkOutput
+
+    val innerActivations = layerActivations.dropRight(1)
+
+    innerActivations.zip(layerWeights).zipWithIndex.foldRight(
+      (new Array[DenseMatrix[Double]](layerActivations.size - 1), predictionError))
+    { case (((activation, weight), idx), (gradients, delta)) =>
+
+      val nextDelta = activationFnDerivative(activation) :* (delta * weight.t(::, 1 to -1))
+
+      val activationWithBias = DenseMatrix.horzcat(
+        DenseMatrix(1.0),
+        activationFn(activation)
+      )
+
+      val layerGradient = delta.t * activationWithBias
+
+      gradients(idx) = layerGradient
+
+      (gradients, nextDelta)
+
+    }._1
+
+  }
+
 }
