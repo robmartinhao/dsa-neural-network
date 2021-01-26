@@ -78,4 +78,15 @@ object mlp {
 
   }
 
+  def sgd(layerWeights: Seq[DenseMatrix[Double]],
+          gradients: Array[DenseMatrix[Double]],
+          learningRate: Double): Seq[DenseMatrix[Double]] =
+  {
+
+    layerWeights.zip(gradients).map
+    {
+      case (weight, gradient) => weight + (gradient.t * learningRate)
+    }
+
+  }
 }
