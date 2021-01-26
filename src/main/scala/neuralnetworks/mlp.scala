@@ -89,4 +89,46 @@ object mlp {
     }
 
   }
+
+  def train(dataset: Seq[TrainingExample],
+            layerDimensions: Seq[Int],
+            activationFn: DenseMatrix[Double] => DenseMatrix[Double],
+            activationFnDerivative: DenseMatrix[Double] => DenseMatrix[Double],
+            learningRate: Double,
+            numEpochs: Int): Unit = {
+
+
+    var weights = initializeWeights(layerDimensions)
+
+    var epoch = 0
+
+    for (i <- (0 to numEpochs)) {
+
+      println(s"Training Epoch #${epoch}")
+
+      for (ex <- dataset) {
+
+        val (activations, output) = forwardPass(ex.input, weights, activationFn)
+        val der = backwardPass(activations, weights, output, ex.output, activationFn, activationFnDerivative)
+
+        weights = sgd(weights, der, learningRate)
+      }
+
+      epoch += 1
+
+    }
+
+    // Teste
+    val (o1, a1) = mlp.forwardPass(dataset(0).input, weights, activationFn)
+    println(s"Prediction para o input ${dataset(0).input.t}", a1)
+
+    val (o2, a2) = mlp.forwardPass(dataset(1).input, weights, activationFn)
+    println(s"Prediction para o input ${dataset(1).input.t}", a2)
+
+    val (o3, a3) = mlp.forwardPass(dataset(2).input, weights, activationFn)
+    println(s"Prediction para o input ${dataset(2).input.t}", a3)
+
+    val (o4, a4) = mlp.forwardPass(dataset(3).input, weights, activationFn)
+    println(s"Prediction para o input ${dataset(3).input.t}", a4)
+  }
 }
