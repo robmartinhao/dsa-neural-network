@@ -2,49 +2,53 @@ package neuralnetworks
 
 import breeze.linalg.DenseMatrix
 import breeze.stats.distributions.Gaussian
-import spire.implicits.rightModuleOps
 
 case class TrainingExample(input: DenseMatrix[Double], output: DenseMatrix[Double])
 
 object mlp {
 
   // Inicializa os pesos da rede neural
-  def initializeWeights(layerDimesions: Seq[Int]): Seq[DenseMatrix[Double]] = {
+  def initializeWeights(layerDimensions: Seq[Int]): Seq[DenseMatrix[Double]] = {
 
-    layerDimesions.dropRight(1).zipWithIndex.foldLeft(new Array[DenseMatrix[Double]](layerDimesions.size - 1)) {
-      case (allWeigths, (layerDim, layerIdx)) =>
-        val layerDimWithBias = layerDim + 1
+    layerDimensions.dropRight(1).zipWithIndex.foldLeft(new Array[DenseMatrix[Double]](layerDimensions.size - 1))
+    { case (allWeights, (layerDim, layerIdx)) =>
 
-        val layerWeights = new DenseMatrix(layerDimWithBias, layerDimesions(layerIdx + 1),
-          new Gaussian(0, 0.2).sample(layerDimWithBias * layerDimesions(layerIdx)).toArray
-        )
+      val layerDimWithBias = layerDim + 1
 
-        allWeigths(layerIdx) = layerWeights
+      val layerWeights = new DenseMatrix(layerDimWithBias, layerDimensions(layerIdx + 1),
+        new Gaussian(0, 0.2).sample(layerDimWithBias * layerDimensions(layerIdx + 1)).toArray
+      )
 
-        allWeigths
+      allWeights(layerIdx) = layerWeights
+
+      allWeights
     }
+
   }
 
   def forwardPass(networkInput: DenseMatrix[Double],
                   layerWeights: Seq[DenseMatrix[Double]],
-                  activationFn: DenseMatrix[Double] => DenseMatrix[Double]): (Array[DenseMatrix[Double]], DenseMatrix[Double]) = {
+                  activationFn: DenseMatrix[Double] => DenseMatrix[Double]): (Array[DenseMatrix[Double]], DenseMatrix[Double]) =
+  {
+
     assert(networkInput.rows + 1 == layerWeights.head.rows)
 
     val initialActivations = new Array[DenseMatrix[Double]](layerWeights.size + 1)
 
     initialActivations(0) = networkInput.t
 
-    layerWeights.zipWithIndex.foldLeft((initialActivations, networkInput.t)) {
-      case ((activations, input), (weight, weightIdx)) =>
+    layerWeights.zipWithIndex.foldLeft((initialActivations, networkInput.t))
+    { case ((activations, input), (weight, weightIdx)) =>
 
-        val inputWithBias = DenseMatrix.horzcat(DenseMatrix(1.0), input)
+      val inputWithBias = DenseMatrix.horzcat(DenseMatrix(1.0), input)
 
-        val layerActivation = inputWithBias * weight
+      val layerActivation = inputWithBias * weight
 
-        activations(weightIdx + 1) = layerActivation
+      activations(weightIdx + 1) = layerActivation
 
-        (activations, activationFn(layerActivation))
+      (activations, activationFn(layerActivation))
     }
+
   }
 
   def backwardPass(layerActivations: Array[DenseMatrix[Double]],
@@ -99,7 +103,6 @@ object mlp {
             learningRate: Double,
             numEpochs: Int): Unit = {
 
-
     var weights = initializeWeights(layerDimensions)
 
     var epoch = 0
@@ -115,9 +118,7 @@ object mlp {
 
         weights = sgd(weights, der, learningRate)
       }
-
       epoch += 1
-
     }
 
     // Teste

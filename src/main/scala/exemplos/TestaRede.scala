@@ -2,7 +2,7 @@ package exemplos
 
 import neuralnetworks.{mlp, TrainingExample}
 import breeze.linalg.DenseMatrix
-import breeze.numerics.sigmoid
+import breeze.numerics._
 
 object TestaRede extends App {
 
@@ -14,14 +14,14 @@ object TestaRede extends App {
   )
 
   val actFn: DenseMatrix[Double] => DenseMatrix[Double] = (x: DenseMatrix[Double]) => sigmoid(x)
-  val actFnDerivate = (x: DenseMatrix[Double]) => x.map(y => sigmoid(y) * (1 - sigmoid(y)))
+  val actFnDerivative = (x: DenseMatrix[Double]) => x.map(y => sigmoid(y) * (1 - sigmoid(y)))
 
-  val learningRate = 0.1;
+  val learningRate = 0.1
 
   mlp.train(dataset,
     Seq(2, 2, 1),
     actFn,
-    actFnDerivate,
+    actFnDerivative,
     learningRate,
     50000)
 }
