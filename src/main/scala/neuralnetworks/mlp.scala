@@ -4,6 +4,8 @@ import breeze.linalg.DenseMatrix
 import breeze.stats.distributions.Gaussian
 import spire.implicits.rightModuleOps
 
+case class TrainingExample(input: DenseMatrix[Double], output: DenseMatrix[Double])
+
 object mlp {
 
   // Inicializa os pesos da rede neural
